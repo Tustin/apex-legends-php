@@ -4,28 +4,27 @@ namespace ApexLegends\Http;
 
 use GuzzleHttp\Psr7\Request;
 
-final class TokenMiddleware {
+final class TokenMiddleware
+{
+	private $accessToken;
+	private $refreshToken;
+	private $expireTime;
 
-    private $accessToken;
-    private $refreshToken;
-    private $expireTime;
+	public function __construct(string $accessToken, string $refreshToken, \DateTime $expireTime)
+	{
+		$this->accessToken = $accessToken;
+		$this->refreshToken = $refreshToken;
+		$this->expireTime = $expireTime;
+	}
 
-
-    public function __construct(string $accessToken, string $refreshToken, \DateTime $expireTime)
-    {
-        $this->accessToken = $accessToken;
-        $this->refreshToken = $refreshToken;
-        $this->expireTime = $expireTime;
-    }
-
-    public function __invoke(Request $request, array $options = [])
-    {
-        return $request->withHeader(
-            'Authorization', sprintf('Bearer %s', $this->accessToken)
-        )->withHeader(
-            'AuthToken', $this->accessToken
-        )->withHeader(
-            'User-Agent', 'Respawn HTTPS/1.0'
-        );
-    }
+	public function __invoke(Request $request, array $options = [])
+	{
+		return $request->withHeader(
+			'Authorization', sprintf('Bearer %s', $this->accessToken)
+		)->withHeader(
+			'AuthToken', $this->accessToken
+		)->withHeader(
+			'User-Agent', 'Respawn HTTPS/1.0'
+		);
+	}
 }
