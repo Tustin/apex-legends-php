@@ -33,7 +33,35 @@ class User extends AbstractApi
         }
         
 		return $this->account;
-	}
+    }
+    
+    /**
+     * Gets Apex stats.
+     * 
+     * NOTE: Right now, PC stats only seem to be given. I'm not sure if this is an endpoint issue or if something is different with the user ids between platforms.
+     * I will keep looking into this.
+     *
+     * @param string $console PC/PS4/Xbox.
+     * @return string Stats data as a string because this API is awful (will fix later).
+     */
+    public function stats(string $console) : string
+    {
+        $response = $this->get('https://r5-pc.stryder.respawn.com/user.php', [
+            'qt' => 'user-getinfo',
+            'getinfo' => 1,
+            'hardware' => $console,
+            'uid' => $this->id(),
+            'language' => 'english',
+            'timezoneOffset' => 1,
+            'ugc' => 1,
+            'rep' => 1,
+            'searching' => 0,
+            'change' => 7,
+            'loadidx' => 1
+        ]);
+
+        return $response;
+    }
 
 	/**
 	 * Get EA account's user ID.

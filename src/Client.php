@@ -110,8 +110,8 @@ class Client
             'client_secret' => 'UIY8dwqhi786T78ya8Kna78akjcp0s',
             'redirect_uri' => 'qrc:///html/login_successful.html'
 		]);
-		
-		$this->accessToken = $response->access_token;
+
+        $this->accessToken = $response->access_token;
         $this->refreshToken = $response->refresh_token;
         $this->expiresIn = $response->expires_in;
 
@@ -174,10 +174,10 @@ class Client
 	 * @param integer $userId The user's EA user ID.
 	 * @return Api\User User object.
 	 */
-	private function user(int $userId) : Api\User
+	public function user(int $userId) : Api\User
 	{
 		return new Api\User($this, $userId);
-	}
+    }
 
 	/**
      * Gets the access token.

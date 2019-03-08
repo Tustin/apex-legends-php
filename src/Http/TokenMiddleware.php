@@ -24,6 +24,8 @@ final class TokenMiddleware {
             'Authorization', sprintf('Bearer %s', $this->accessToken)
         )->withHeader(
             'AuthToken', $this->accessToken
+        )->withHeader(
+            'User-Agent', 'Respawn HTTPS/1.0'
         );
     }
 }
