@@ -22,6 +22,8 @@ final class TokenMiddleware {
     {
         return $request->withHeader(
             'Authorization', sprintf('Bearer %s', $this->accessToken)
+        )->withHeader(
+            'AuthToken', $this->accessToken
         );
     }
 }

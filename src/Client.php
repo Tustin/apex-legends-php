@@ -13,7 +13,8 @@ class Client
     private $httpClient;
     private $options;
 
-    const LOGIN_FORM_URL = 'https://accounts.ea.com/connect/auth?client_id=ORIGIN_PC&response_type=code id_token&redirect_uri=qrc:///html/login_successful.html&display=originX/login&locale=en_US';
+	const LOGIN_FORM_URL = 'https://accounts.ea.com/connect/auth?client_id=ORIGIN_PC&response_type=code id_token&redirect_uri=qrc:///html/login_successful.html&display=originX/login&locale=en_US';
+	const USER_SEARCH_URL = 'https://api2.origin.com/xsearch/users';
 
 	/**
 	 * Construct new Client
@@ -45,8 +46,6 @@ class Client
             // Throw error
             die('bad location');
         }
-
-        var_dump($locationUrl);
 
         // This should set the session id (using the Guzzle cookie jar)
         $response = $this->httpClient()->get($locationUrl);
@@ -110,10 +109,18 @@ class Client
             'client_id' => 'ORIGIN_PC',
             'client_secret' => 'UIY8dwqhi786T78ya8Kna78akjcp0s',
             'redirect_uri' => 'qrc:///html/login_successful.html'
-        ]);
+		]);
+		
+		$this->accessToken = $response->access_token;
+        $this->refreshToken = $response->refresh_token;
+        $this->expiresIn = $response->expires_in;
 
-        // OAuth token response
-        var_dump($response);
+        $handler = \GuzzleHttp\HandlerStack::create();
+        $handler->push(Middleware::mapRequest(new TokenMiddleware($this->accessToken(), $this->refreshToken(), $this->expireDate())));
+
+        $newOptions = array_merge(['handler' => $handler], $this->options);
+    
+        $this->httpClient = new HttpClient(new \GuzzleHttp\Client($newOptions));
     }
 
     /**
@@ -125,6 +132,82 @@ class Client
     {
         return $this->httpClient;
 	}
+
+	// Should this be a singleton??
+	public function account()
+	{
+		return new Api\Account($this);
+	}
+
+	/**
+	 * Searches Origin for a list of users.
+	 *
+	 * @param string $searchUsername Username to search for.
+	 * @return array<Api\User> Array of User for each user.
+	 */
+	public function users(string $searchUsername) : array
+	{
+		$accountUserId = $this->account()->id();
+		$returnUsers = [];
+
+		$response = $this->httpClient()->get(self::USER_SEARCH_URL, [
+			'userId' => $accountUserId,
+			'searchTerm' => $searchUsername
+		]);
+
+		if ($response->totalCount === 0)
+		{
+			return $returnUsers;
+		}
+
+		foreach ($response->infoList as $foundUser)
+		{
+			$returnUsers[] = $this->user((int)$foundUser->friendUserId);
+		}
+
+		return $returnUsers;
+	}
+
+	/**
+	 * Creates a new User object.
+	 *
+	 * @param integer $userId The user's EA user ID.
+	 * @return Api\User User object.
+	 */
+	private function user(int $userId) : Api\User
+	{
+		return new Api\User($this, $userId);
+	}
+
+	/**
+     * Gets the access token.
+     *
+     * @return string
+     */
+    public function accessToken() : string
+    {
+        return $this->accessToken;
+    }
+
+    /**
+     * Gets the refresh token.
+     *
+     * @return string
+     */
+    public function refreshToken() : string
+    {
+        return $this->refreshToken;
+    }
+
+    /**
+     * Gets the access token expire DateTime.
+     *
+     * @return \DateTime
+     */
+    public function expireDate() : \DateTime
+    {
+        return new \DateTime(sprintf('+%d seconds', $this->expiresIn));
+    }
 	
 	/**
 	 * Generates a random 32 char CID for login.
@@ -136,5 +219,4 @@ class Client
         $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         return substr(str_shuffle($chars), 0, 32);
     }
-
 }
