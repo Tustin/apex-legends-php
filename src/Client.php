@@ -60,8 +60,6 @@ class Client
 
         $loginFormUrl = 'https://signin.ea.com' . $loginFormUrl;    
 
-        $this->httpClient()->get($loginFormUrl);
-    
         $response = $this->httpClient()->post($loginFormUrl, [
             'email' => $email,
             'password' => $password,
