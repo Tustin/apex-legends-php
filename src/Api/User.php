@@ -46,10 +46,10 @@ class User extends AbstractApi
 	 */
 	public function stats(string $console) : string
 	{
-		$response = $this->get('https://r5-pc.stryder.respawn.com/user.php', [
+		$response = $this->get(sprintf('https://r5-%s.stryder.respawn.com/user.php', strtolower($console)), [
 			'qt' => 'user-getinfo',
 			'getinfo' => 1,
-			'hardware' => $console,
+			'hardware' => strtoupper($console),
 			'uid' => $this->id(),
 			'language' => 'english',
 			'timezoneOffset' => 1,
