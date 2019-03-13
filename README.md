@@ -67,7 +67,7 @@ var_dump($user->stats('PS4'));
 
 ### Xbox
 
-To get XBOX statistics, you need an XUID, you can get it using [OpenXBL PHP] (https://github.com/OpenXBL/OpenXBL-PHP), it’s not difficult, then everything is just like with PS4
+To get XBOX statistics, you need an XUID, you can get it using [OpenXBL PHP](https://github.com/OpenXBL/OpenXBL-PHP), it’s not difficult, then everything is just like with PS4
 
 ```php
 $user = $client->user(2535413617198328);
